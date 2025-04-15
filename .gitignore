@@ -1,0 +1,15 @@
+# Ignore all .config files
+*.config
+
+# Sensitive files
+.env
+credentials.json
+token.pickle
+
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.ico
