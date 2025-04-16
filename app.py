@@ -95,9 +95,9 @@ def main():
     )
 
     # OAuth 콜백 처리
-    query_params = st.experimental_get_query_params()
-    if 'code' in query_params and not st.session_state['authenticated']:
-        code = query_params['code'][0]
+    params = st.query_params
+    if 'code' in params and not st.session_state['authenticated']:
+        code = params['code']
         token_data = exchange_code_for_token(code)
         
         if token_data and 'access_token' in token_data:
@@ -106,8 +106,8 @@ def main():
                 st.session_state['authenticated'] = True
                 st.session_state['user_email'] = user_info['email']
                 # 인증 코드 제거
-                st.experimental_set_query_params()
-                st.experimental_rerun()
+                params.clear()
+                st.rerun()
 
     # 로그인 상태 확인
     if not st.session_state['authenticated']:
