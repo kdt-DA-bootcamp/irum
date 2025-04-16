@@ -3,6 +3,7 @@ from streamlit_option_menu import option_menu
 from app.components.profile_management import show_profile_management
 from app.components.job_management import show_job_management
 import os
+import requests
 
 # 이미지 URL 설정
 LOGO_URL = "https://i.imgur.com/thQZtYk.png"
@@ -19,6 +20,33 @@ if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 if 'user_email' not in st.session_state:
     st.session_state['user_email'] = None
+
+def exchange_code_for_token(code):
+    token_url = "https://oauth2.googleapis.com/token"
+    client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
+    client_secret = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_SECRET"]
+    
+    data = {
+        'code': code,
+        'client_id': client_id,
+        'client_secret': client_secret,
+        'redirect_uri': 'https://dreamirum.streamlit.app',
+        'grant_type': 'authorization_code'
+    }
+    
+    response = requests.post(token_url, data=data)
+    if response.ok:
+        return response.json()
+    return None
+
+def get_user_info(access_token):
+    user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+    headers = {'Authorization': f'Bearer {access_token}'}
+    
+    response = requests.get(user_info_url, headers=headers)
+    if response.ok:
+        return response.json()
+    return None
 
 def main():
     # CSS 스타일 적용
@@ -66,9 +94,21 @@ def main():
         unsafe_allow_html=True
     )
 
-    # OAuth 설정
-    client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
-    
+    # OAuth 콜백 처리
+    query_params = st.experimental_get_query_params()
+    if 'code' in query_params and not st.session_state['authenticated']:
+        code = query_params['code'][0]
+        token_data = exchange_code_for_token(code)
+        
+        if token_data and 'access_token' in token_data:
+            user_info = get_user_info(token_data['access_token'])
+            if user_info and 'email' in user_info:
+                st.session_state['authenticated'] = True
+                st.session_state['user_email'] = user_info['email']
+                # 인증 코드 제거
+                st.experimental_set_query_params()
+                st.experimental_rerun()
+
     # 로그인 상태 확인
     if not st.session_state['authenticated']:
         st.markdown(
@@ -102,6 +142,7 @@ def main():
         )
         
         # OAuth 로그인 버튼
+        client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
         auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id={client_id}&redirect_uri=https://dreamirum.streamlit.app&scope=openid%20email%20profile"
         st.markdown(
             f"""
