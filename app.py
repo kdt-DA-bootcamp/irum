@@ -14,6 +14,12 @@ st.set_page_config(
     layout="wide"
 )
 
+# 세션 상태 초기화
+if 'authenticated' not in st.session_state:
+    st.session_state['authenticated'] = False
+if 'user_email' not in st.session_state:
+    st.session_state['user_email'] = None
+
 def main():
     # CSS 스타일 적용
     st.markdown(
@@ -64,7 +70,7 @@ def main():
     client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
     
     # 로그인 상태 확인
-    if not st.experimental_user.email:
+    if not st.session_state['authenticated']:
         st.markdown(
             """
             <style>
@@ -131,7 +137,7 @@ def main():
     # 메인 컨텐츠
     if selected == "대시보드":
         st.title("대시보드")
-        st.write(f"환영합니다, {st.experimental_user.email}님!")
+        st.write(f"환영합니다, {st.session_state['user_email']}님!")
         st.write("대시보드 기능은 준비 중입니다.")
     elif selected == "이력 관리":
         show_profile_management()
