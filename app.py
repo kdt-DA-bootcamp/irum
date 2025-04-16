@@ -1,6 +1,5 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-from app.auth.google_auth import google_login
 from app.components.profile_management import show_profile_management
 from app.components.job_management import show_job_management
 import os
@@ -14,12 +13,6 @@ st.set_page_config(
     page_icon="🚀",
     layout="wide"
 )
-
-# 세션 상태 초기화
-if 'authenticated' not in st.session_state:
-    st.session_state['authenticated'] = False
-if 'user_info' not in st.session_state:
-    st.session_state['user_info'] = None
 
 def main():
     # CSS 스타일 적용
@@ -67,7 +60,10 @@ def main():
         unsafe_allow_html=True
     )
 
-    if not st.session_state.get('authenticated'):
+    # Streamlit 사용자 인증 확인
+    user = st.experimental_user
+
+    if not user.email:
         st.markdown(
             """
             <style>
@@ -98,8 +94,7 @@ def main():
             unsafe_allow_html=True
         )
         
-        # Google 로그인 처리
-        google_login()
+        st.info("이 서비스를 이용하려면 로그인이 필요합니다. Streamlit Community Cloud 로그인 버튼을 클릭해주세요.")
         return
 
     # 로그인 후 메인 화면
@@ -122,6 +117,7 @@ def main():
     # 메인 컨텐츠
     if selected == "대시보드":
         st.title("대시보드")
+        st.write(f"환영합니다, {user.email}님!")
         st.write("대시보드 기능은 준비 중입니다.")
     elif selected == "이력 관리":
         show_profile_management()
