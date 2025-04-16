@@ -81,6 +81,10 @@ def main():
             text-align: left;
             color: white;
         }
+        .login-button-container {
+            text-align: left;
+            padding-left: 2rem;
+        }
         [data-testid="stFullScreenFrame"] [data-testid="stImage"] {
             display: flex;
             justify-content: flex-start;
@@ -160,12 +164,14 @@ def main():
         st.markdown(
             f"""
             <div class="main-container">
-                <a href="{auth_url}" target="_self">
-                    <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; display: flex; align-items: center;">
-                        <img src="https://www.google.com/favicon.ico" style="width: 18px; height: 18px; margin-right: 10px;">
-                        Sign in with Google
-                    </button>
-                </a>
+                <div class="text-container">
+                    <a href="{auth_url}" target="_self">
+                        <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; display: flex; align-items: center;">
+                            <img src="https://www.google.com/favicon.ico" style="width: 18px; height: 18px; margin-right: 10px;">
+                            Sign in with Google
+                        </button>
+                    </a>
+                </div>
             </div>
             """,
             unsafe_allow_html=True
