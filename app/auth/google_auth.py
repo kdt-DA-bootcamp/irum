@@ -1,9 +1,9 @@
 import os
 import streamlit as st
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow, Flow
+from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-from shared.config.auth_config import SCOPES, GOOGLE_OAUTH_REDIRECT_URI
+from shared.config.auth_config import SCOPES
 
 def google_login():
     try:
@@ -12,35 +12,28 @@ def google_login():
             return True
 
         # 환경 변수에서 클라이언트 정보 가져오기
-        client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
-        client_secret = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_SECRET"]
-        
-        if not client_id or not client_secret:
-            st.error("Google OAuth 설정이 필요합니다.")
-            return
+        client_config = {
+            "web": {
+                "client_id": st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"],
+                "client_secret": st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_SECRET"],
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "redirect_uris": ["https://dreamirum.streamlit.app"]
+            }
+        }
 
         # OAuth 설정
-        flow = Flow.from_client_config(
-            {
-                "web": {
-                    "client_id": client_id,
-                    "client_secret": client_secret,
-                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                    "token_uri": "https://oauth2.googleapis.com/token",
-                    "redirect_uris": [GOOGLE_OAUTH_REDIRECT_URI],
-                }
-            },
-            scopes=SCOPES
+        flow = InstalledAppFlow.from_client_config(
+            client_config,
+            scopes=SCOPES,
+            redirect_uri="https://dreamirum.streamlit.app"
         )
-        
+
         # URL 파라미터에서 인증 코드 확인
         query_params = st.query_params
-        if 'code' in query_params and 'state' in query_params:
+        if 'code' in query_params:
             try:
-                flow.redirect_uri = GOOGLE_OAUTH_REDIRECT_URI
-                flow.fetch_token(
-                    authorization_response=f"{GOOGLE_OAUTH_REDIRECT_URI}?code={query_params['code']}&state={query_params['state']}"
-                )
+                flow.fetch_token(code=query_params['code'])
                 
                 # 사용자 인증 완료
                 credentials = flow.credentials
@@ -64,15 +57,11 @@ def google_login():
             
         else:
             # 인증 URL 생성
-            flow.redirect_uri = GOOGLE_OAUTH_REDIRECT_URI
-            authorization_url, state = flow.authorization_url(
+            authorization_url, _ = flow.authorization_url(
                 access_type='offline',
                 include_granted_scopes='true',
                 prompt='consent'
             )
-            
-            # state를 세션에 저장
-            st.session_state['oauth_state'] = state
             
             # 사용자를 인증 페이지로 리다이렉트
             st.markdown(
