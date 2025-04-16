@@ -61,6 +61,17 @@ def main():
             padding: 2rem !important;
             max-width: 100% !important;
         }
+        [data-testid="stElementContainer"] {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        [data-testid="stFullScreenFrame"] {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 600px;
+        }
         .main-container {
             max-width: 600px;
             margin: 0 auto;
