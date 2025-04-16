@@ -1,6 +1,7 @@
+import os
 import streamlit as st
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google_auth_oauthlib.flow import InstalledAppFlow, Flow
 from google.auth.transport.requests import Request
 from shared.config.auth_config import SCOPES, GOOGLE_OAUTH_REDIRECT_URI
 
@@ -10,15 +11,31 @@ def google_login():
         if st.session_state.get('authenticated'):
             return True
 
+        # 환경 변수에서 클라이언트 정보 가져오기
+        client_id = os.getenv('GOOGLE_CLIENT_ID')
+        client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
+        
+        if not client_id or not client_secret:
+            st.error("Google OAuth 설정이 필요합니다.")
+            return
+
+        # OAuth 설정
+        flow = Flow.from_client_config(
+            {
+                "web": {
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "redirect_uris": ["http://localhost:8501/"],
+                }
+            },
+            scopes=["openid", "https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"]
+        )
+        
         # URL 파라미터에서 인증 코드 확인
         query_params = st.query_params
         if 'code' in query_params:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json',
-                scopes=SCOPES,
-                redirect_uri=GOOGLE_OAUTH_REDIRECT_URI
-            )
-            
             code = query_params['code']
             flow.fetch_token(code=code)
             
@@ -40,12 +57,6 @@ def google_login():
             return True
             
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json',
-                scopes=SCOPES,
-                redirect_uri=GOOGLE_OAUTH_REDIRECT_URI
-            )
-            
             # 인증 URL 생성
             authorization_url, state = flow.authorization_url(
                 access_type='offline',

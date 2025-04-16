@@ -75,24 +75,8 @@ def main():
                 background-color: #4285f4;
             }
             </style>
-            """,
-            unsafe_allow_html=True
-        )
-        # 로고
-        st.image(LOGO_URL, width=300)
-        
-        # 텍스트
-        st.markdown(
-            """
-            <div class="main-container">
-                <div class="text-container">
-                    <h1 style="font-size: 2rem; margin-bottom: 1.5rem; font-weight: 500; line-height: 1.35; color: white;">미래로의 문을 여는 곳, 이룸</h1>
-                    <div style="font-size: 1.1rem; margin-bottom: 3rem; line-height: 1.6; color: white;">
-                        이룸은 이력 관리와 지원 공고 분석을 통해 취업과 이직을 위한 맞춤형 서류 제작은 물론 경력 관리까지 지원하는 서비스입니다.
-                        <br><br>
-                        여러분의 경험을 이해하고, 커리어 시장에서 원하는 미래로 나아가는 길을 함께 엽니다.
-                    </div>
-                </div>
+            <div style="text-align: center; padding: 10rem 2rem 0 2rem;">
+                <img src="https://i.imgur.com/YOUR_IMGUR_ID.png" width="300"/>
             </div>
             """,
             unsafe_allow_html=True
@@ -104,7 +88,14 @@ def main():
 
     # 로그인 후 메인 화면
     with st.sidebar:
-        st.image(LOGO_URL, width=150)
+        st.markdown(
+            """
+            <div style="text-align: center;">
+                <img src="https://i.imgur.com/YOUR_IMGUR_ID.png" width="150"/>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         selected = option_menu(
             menu_title=None,
             options=["대시보드", "이력 관리", "공고 관리", "서류 관리"],
