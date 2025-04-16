@@ -60,10 +60,11 @@ def main():
         unsafe_allow_html=True
     )
 
-    # Streamlit 사용자 인증 확인
-    user = st.experimental_user
-
-    if not user.email:
+    # OAuth 설정
+    client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
+    
+    # 로그인 상태 확인
+    if not st.experimental_user.email:
         st.markdown(
             """
             <style>
@@ -94,9 +95,20 @@ def main():
             unsafe_allow_html=True
         )
         
-        # 로그인 버튼 클릭 시 처리
-        if st.button("로그인"):
-            st.experimental_rerun()
+        # OAuth 로그인 버튼
+        auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id={client_id}&redirect_uri=https://dreamirum.streamlit.app&scope=openid%20email%20profile"
+        st.markdown(
+            f"""
+            <div class="main-container">
+                <a href="{auth_url}" target="_self">
+                    <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500;">
+                        로그인
+                    </button>
+                </a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         return
 
     # 로그인 후 메인 화면
@@ -119,7 +131,7 @@ def main():
     # 메인 컨텐츠
     if selected == "대시보드":
         st.title("대시보드")
-        st.write(f"환영합니다, {user.email}님!")
+        st.write(f"환영합니다, {st.experimental_user.email}님!")
         st.write("대시보드 기능은 준비 중입니다.")
     elif selected == "이력 관리":
         show_profile_management()
