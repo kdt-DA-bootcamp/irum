@@ -5,8 +5,8 @@ from app.components.profile_management import show_profile_management
 from app.components.job_management import show_job_management
 import os
 
-# 이미지 URL 설정 (여기에 구글 드라이브 공유 링크를 넣어주세요)
-LOGO_URL = "https://imgur.com/a/irum-logo-KiP8Ska"
+# 이미지 URL 설정
+LOGO_URL = "https://i.imgur.com/KiP8Ska.png"
 
 # 페이지 기본 설정
 st.set_page_config(
