@@ -12,8 +12,8 @@ def google_login():
             return True
 
         # 환경 변수에서 클라이언트 정보 가져오기
-        client_id = st.secrets["google_oauth"]["GOOGLE_CLIENT_ID"]
-        client_secret = st.secrets["google_oauth"]["GOOGLE_CLIENT_SECRET"]
+        client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
+        client_secret = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_SECRET"]
         
         if not client_id or not client_secret:
             st.error("Google OAuth 설정이 필요합니다.")
