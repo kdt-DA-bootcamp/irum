@@ -3,6 +3,11 @@ from streamlit_option_menu import option_menu
 from app.auth.google_auth import google_login
 from app.components.profile_management import show_profile_management
 from app.components.job_management import show_job_management
+import os
+
+# 이미지 경로 설정
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+LOGO_PATH = os.path.join(CURRENT_DIR, "app", "assets", "logo.png")
 
 # 페이지 기본 설정
 st.set_page_config(
@@ -75,7 +80,7 @@ def main():
             unsafe_allow_html=True
         )
         # 로고
-        st.image("app/assets/logo.png", width=300)
+        st.image(LOGO_PATH, width=300)
         
         # 텍스트
         st.markdown(
@@ -100,7 +105,7 @@ def main():
 
     # 로그인 후 메인 화면
     with st.sidebar:
-        st.image("app/assets/logo.png", width=150)
+        st.image(LOGO_PATH, width=150)
         selected = option_menu(
             menu_title=None,
             options=["대시보드", "이력 관리", "공고 관리", "서류 관리"],
