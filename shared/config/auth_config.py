@@ -12,7 +12,7 @@ SCOPES = [
 ]
 
 # Google OAuth Redirect URI
-GOOGLE_OAUTH_REDIRECT_URI = "https://dreamirum.streamlit.app/"
+GOOGLE_OAUTH_REDIRECT_URI = "https://dreamirum.streamlit.app"
 
 # 개발 환경에서는 로컬 URI 사용
 if os.getenv('DEVELOPMENT') == 'true':
