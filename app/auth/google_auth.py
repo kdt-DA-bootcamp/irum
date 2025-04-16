@@ -19,9 +19,6 @@ def google_login():
             st.error("Google OAuth 설정이 필요합니다.")
             return
 
-        # 현재 URL 가져오기
-        current_url = st.experimental_get_query_params().get('host_url', ['http://localhost:8501'])[0]
-        
         # OAuth 설정
         flow = Flow.from_client_config(
             {
@@ -30,7 +27,7 @@ def google_login():
                     "client_secret": client_secret,
                     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                     "token_uri": "https://oauth2.googleapis.com/token",
-                    "redirect_uris": [current_url],
+                    "redirect_uris": ["https://dreamirum.streamlit.app/", "http://localhost:8501"],
                 }
             },
             scopes=["openid", "https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"]
