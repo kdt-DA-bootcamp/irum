@@ -81,9 +81,11 @@ def main():
             text-align: left;
             color: white;
         }
-        .login-button-container {
-            text-align: left;
-            padding-left: 2rem;
+        /* 로그인 버튼 컨테이너 스타일 */
+        div:nth-child(5) div.main-container {
+            margin-left: calc(2rem + 0px);
+            margin-right: auto;
+            padding: 0;
         }
         [data-testid="stFullScreenFrame"] [data-testid="stImage"] {
             display: flex;
