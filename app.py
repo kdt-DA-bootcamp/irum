@@ -83,9 +83,9 @@ def main():
         }
         [data-testid="stFullScreenFrame"] [data-testid="stImage"] {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             width: 600px !important;
-            margin: 0 auto !important;
+            margin: 0 !important;
             padding: 10rem 2rem 0 2rem !important;
         }
         [data-testid="stImage"] > img {
