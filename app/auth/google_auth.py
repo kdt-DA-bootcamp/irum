@@ -4,39 +4,8 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from shared.config.auth_config import SCOPES
-from streamlit_google_auth import Authenticate
-
-def init_google_auth():
-    authenticator = Authenticate(
-        secret_credentials_path='client_secret.json',
-        cookie_name='irum_auth',
-        cookie_key='irum_secret_key',
-        redirect_uri='https://dreamirum.streamlit.app',
-    )
-    return authenticator
 
 def google_login():
-    authenticator = init_google_auth()
-    
-    # 인증 상태 확인
-    authenticator.check_authentification()
-    
-    # 로그인 버튼 표시
-    authenticator.login()
-    
-    if st.session_state.get('connected'):
-        return {
-            'name': st.session_state['user_info'].get('name'),
-            'email': st.session_state['user_info'].get('email'),
-            'picture': st.session_state['user_info'].get('picture')
-        }
-    return None
-
-def google_logout():
-    authenticator = init_google_auth()
-    authenticator.logout()
-
-def google_login_old():
     try:
         # 이미 인증된 경우 처리
         if st.session_state.get('authenticated'):
@@ -114,4 +83,11 @@ def google_login_old():
             
     except Exception as e:
         st.error(f"로그인 중 오류가 발생했습니다: {str(e)}")
-        return False 
+        return False
+
+def google_logout():
+    if 'authenticated' in st.session_state:
+        del st.session_state['authenticated']
+    if 'user_info' in st.session_state:
+        del st.session_state['user_info']
+    st.rerun() 
