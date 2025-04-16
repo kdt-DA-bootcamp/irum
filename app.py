@@ -82,10 +82,15 @@ def main():
             color: white;
         }
         /* 로그인 버튼 컨테이너 스타일 */
-        div:nth-child(5) div.main-container {
-            margin-left: calc(2rem + 0px);
-            margin-right: auto;
-            padding: 0;
+        div.block-container > div > div > div > div:nth-child(5) {
+            margin-left: 0;
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+        }
+        div.block-container > div > div > div > div:nth-child(5) > div {
+            margin-left: 0;
+            padding-left: 0;
         }
         [data-testid="stFullScreenFrame"] [data-testid="stImage"] {
             display: flex;
