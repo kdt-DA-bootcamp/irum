@@ -94,8 +94,9 @@ def main():
             unsafe_allow_html=True
         )
         
-        # Streamlit 기본 로그인 버튼
-        st.button("로그인")
+        # 로그인 버튼 클릭 시 처리
+        if st.button("로그인"):
+            st.experimental_rerun()
         return
 
     # 로그인 후 메인 화면
