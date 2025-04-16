@@ -161,8 +161,9 @@ def main():
             f"""
             <div class="main-container">
                 <a href="{auth_url}" target="_self">
-                    <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500;">
-                        로그인
+                    <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; display: flex; align-items: center;">
+                        <img src="https://www.google.com/favicon.ico" style="width: 18px; height: 18px; margin-right: 10px;">
+                        Sign in with Google
                     </button>
                 </a>
             </div>
