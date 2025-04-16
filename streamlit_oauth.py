@@ -2,7 +2,6 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 from app.components.profile_management import show_profile_management
 from app.components.job_management import show_job_management
-import os
 
 # 이미지 URL 설정
 LOGO_URL = "https://i.imgur.com/thQZtYk.png"
@@ -60,11 +59,8 @@ def main():
         unsafe_allow_html=True
     )
 
-    # OAuth 설정
-    client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
-    
-    # 로그인 상태 확인
-    if not st.experimental_user.email:
+    # 인증 상태 확인
+    if not st.experimental_user.is_logged_in:
         st.markdown(
             """
             <style>
@@ -95,20 +91,9 @@ def main():
             unsafe_allow_html=True
         )
         
-        # OAuth 로그인 버튼
-        auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id={client_id}&redirect_uri=https://dreamirum.streamlit.app&scope=openid%20email%20profile"
-        st.markdown(
-            f"""
-            <div class="main-container">
-                <a href="{auth_url}" target="_self">
-                    <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500;">
-                        로그인
-                    </button>
-                </a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        # 구글 로그인 버튼
+        if st.button("구글 계정으로 로그인", type="primary"):
+            st.login()
         return
 
     # 로그인 후 메인 화면
@@ -133,6 +118,8 @@ def main():
         st.title("대시보드")
         st.write(f"환영합니다, {st.experimental_user.email}님!")
         st.write("대시보드 기능은 준비 중입니다.")
+        if st.button("로그아웃", type="secondary"):
+            st.logout()
     elif selected == "이력 관리":
         show_profile_management()
     elif selected == "공고 관리":
@@ -142,4 +129,4 @@ def main():
         st.write("서류 관리 기능은 준비 중입니다.")
 
 if __name__ == "__main__":
-    main()
+    main() 
