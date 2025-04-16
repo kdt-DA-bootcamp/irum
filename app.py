@@ -5,9 +5,8 @@ from app.components.profile_management import show_profile_management
 from app.components.job_management import show_job_management
 import os
 
-# 이미지 경로 설정
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-LOGO_PATH = os.path.join(CURRENT_DIR, "app", "assets", "logo.png")
+# 이미지 URL 설정 (여기에 구글 드라이브 공유 링크를 넣어주세요)
+LOGO_URL = "https://drive.google.com/uc?export=view&id=1Pb6HmbxvkXExgTGE7Ygfmqm7PjpxdoR9"
 
 # 페이지 기본 설정
 st.set_page_config(
@@ -80,7 +79,7 @@ def main():
             unsafe_allow_html=True
         )
         # 로고
-        st.image(LOGO_PATH, width=300)
+        st.image(LOGO_URL, width=300)
         
         # 텍스트
         st.markdown(
@@ -105,7 +104,7 @@ def main():
 
     # 로그인 후 메인 화면
     with st.sidebar:
-        st.image(LOGO_PATH, width=150)
+        st.image(LOGO_URL, width=150)
         selected = option_menu(
             menu_title=None,
             options=["대시보드", "이력 관리", "공고 관리", "서류 관리"],
