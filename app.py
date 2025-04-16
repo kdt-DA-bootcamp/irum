@@ -89,12 +89,17 @@ def main():
                         여러분의 경험을 이해하고, 커리어 시장에서 원하는 미래로 나아가는 길을 함께 엽니다.
                     </div>
                 </div>
+                <div style="text-align: left;">
+                    <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; font-size: 16px; font-weight: 500;">
+                        <img src="https://www.google.com/favicon.ico" style="margin-right: 10px; width: 18px; height: 18px;">
+                        로그인
+                    </button>
+                </div>
             </div>
             """,
             unsafe_allow_html=True
         )
         
-        st.info("이 서비스를 이용하려면 로그인이 필요합니다. Streamlit Community Cloud 로그인 버튼을 클릭해주세요.")
         return
 
     # 로그인 후 메인 화면
