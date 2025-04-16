@@ -70,7 +70,9 @@ def main():
             text-align: left;
             color: white;
         }
-        [data-testid="stImage"] {
+        [data-testid="stFullScreenFrame"] [data-testid="stImage"] {
+            display: flex;
+            justify-content: center;
             width: 600px !important;
             margin: 0 auto !important;
             padding: 10rem 2rem 0 2rem !important;
