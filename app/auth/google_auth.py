@@ -3,7 +3,7 @@ import streamlit as st
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow, Flow
 from google.auth.transport.requests import Request
-from shared.config.auth_config import SCOPES
+from shared.config.auth_config import SCOPES, GOOGLE_OAUTH_REDIRECT_URI
 
 def google_login():
     try:
@@ -12,8 +12,8 @@ def google_login():
             return True
 
         # 환경 변수에서 클라이언트 정보 가져오기
-        client_id = os.getenv('GOOGLE_CLIENT_ID')
-        client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
+        client_id = st.secrets["google_oauth"]["GOOGLE_CLIENT_ID"]
+        client_secret = st.secrets["google_oauth"]["GOOGLE_CLIENT_SECRET"]
         
         if not client_id or not client_secret:
             st.error("Google OAuth 설정이 필요합니다.")
@@ -27,40 +27,47 @@ def google_login():
                     "client_secret": client_secret,
                     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                     "token_uri": "https://oauth2.googleapis.com/token",
-                    "redirect_uris": ["https://dreamirum.streamlit.app/", "http://localhost:8501"],
+                    "redirect_uris": [GOOGLE_OAUTH_REDIRECT_URI],
                 }
             },
-            scopes=["openid", "https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"]
+            scopes=SCOPES
         )
+        
+        flow.redirect_uri = GOOGLE_OAUTH_REDIRECT_URI
         
         # URL 파라미터에서 인증 코드 확인
         query_params = st.query_params
         if 'code' in query_params:
-            code = query_params['code']
-            flow.fetch_token(code=code)
-            
-            # 사용자 인증 완료
-            credentials = flow.credentials
-            st.session_state['authenticated'] = True
-            st.session_state['user_info'] = {
-                'token': credentials.token,
-                'refresh_token': credentials.refresh_token,
-                'token_uri': credentials.token_uri,
-                'client_id': credentials.client_id,
-                'client_secret': credentials.client_secret,
-                'scopes': credentials.scopes
-            }
-            
-            # 인증 코드 제거를 위한 리디렉션
-            st.query_params.clear()
-            st.rerun()
-            return True
+            try:
+                code = query_params['code']
+                flow.fetch_token(code=code)
+                
+                # 사용자 인증 완료
+                credentials = flow.credentials
+                st.session_state['authenticated'] = True
+                st.session_state['user_info'] = {
+                    'token': credentials.token,
+                    'refresh_token': credentials.refresh_token,
+                    'token_uri': credentials.token_uri,
+                    'client_id': credentials.client_id,
+                    'client_secret': credentials.client_secret,
+                    'scopes': credentials.scopes
+                }
+                
+                # 인증 코드 제거를 위한 리디렉션
+                st.query_params.clear()
+                st.rerun()
+                return True
+            except Exception as e:
+                st.error(f"인증 코드 처리 중 오류가 발생했습니다: {str(e)}")
+                return False
             
         else:
             # 인증 URL 생성
             authorization_url, state = flow.authorization_url(
                 access_type='offline',
-                include_granted_scopes='true'
+                include_granted_scopes='true',
+                prompt='consent'
             )
             
             # 사용자를 인증 페이지로 리다이렉트
