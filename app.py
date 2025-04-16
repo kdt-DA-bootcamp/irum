@@ -1,22 +1,9 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-from streamlit_google_auth import GoogleOAuth
+from app.auth.google_auth import google_login
 from app.components.profile_management import show_profile_management
 from app.components.job_management import show_job_management
 import os
-
-# Google OAuth 설정
-GOOGLE_CLIENT_ID = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
-GOOGLE_CLIENT_SECRET = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_SECRET"]
-REDIRECT_URI = "https://dreamirum.streamlit.app"
-
-# Google OAuth 초기화
-auth = GoogleOAuth(
-    client_id=GOOGLE_CLIENT_ID,
-    client_secret=GOOGLE_CLIENT_SECRET,
-    redirect_uri=REDIRECT_URI,
-    scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile']
-)
 
 # 이미지 URL 설정
 LOGO_URL = "https://i.imgur.com/thQZtYk.png"
@@ -112,7 +99,7 @@ def main():
         )
         
         # Google 로그인 처리
-        auth.login()
+        google_login()
         return
 
     # 로그인 후 메인 화면
