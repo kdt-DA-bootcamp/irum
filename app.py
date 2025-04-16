@@ -6,7 +6,7 @@ from app.components.job_management import show_job_management
 import os
 
 # 이미지 URL 설정 (여기에 구글 드라이브 공유 링크를 넣어주세요)
-LOGO_URL = "https://drive.google.com/uc?export=view&id=1Pb6HmbxvkXExgTGE7Ygfmqm7PjpxdoR9"
+LOGO_URL = "https://imgur.com/a/irum-logo-KiP8Ska"
 
 # 페이지 기본 설정
 st.set_page_config(
