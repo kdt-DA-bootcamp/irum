@@ -33,14 +33,14 @@ def google_login():
             scopes=SCOPES
         )
         
-        flow.redirect_uri = GOOGLE_OAUTH_REDIRECT_URI
-        
         # URL 파라미터에서 인증 코드 확인
         query_params = st.query_params
-        if 'code' in query_params:
+        if 'code' in query_params and 'state' in query_params:
             try:
-                code = query_params['code']
-                flow.fetch_token(code=code)
+                flow.redirect_uri = GOOGLE_OAUTH_REDIRECT_URI
+                flow.fetch_token(
+                    authorization_response=f"{GOOGLE_OAUTH_REDIRECT_URI}?code={query_params['code']}&state={query_params['state']}"
+                )
                 
                 # 사용자 인증 완료
                 credentials = flow.credentials
@@ -64,11 +64,15 @@ def google_login():
             
         else:
             # 인증 URL 생성
+            flow.redirect_uri = GOOGLE_OAUTH_REDIRECT_URI
             authorization_url, state = flow.authorization_url(
                 access_type='offline',
                 include_granted_scopes='true',
                 prompt='consent'
             )
+            
+            # state를 세션에 저장
+            st.session_state['oauth_state'] = state
             
             # 사용자를 인증 페이지로 리다이렉트
             st.markdown(
