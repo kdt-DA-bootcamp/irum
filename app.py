@@ -6,7 +6,7 @@ from app.components.job_management import show_job_management
 import os
 
 # 이미지 URL 설정
-LOGO_URL = "https://imgur.com/thQZtYk"
+LOGO_URL = "https://i.imgur.com/thQZtYk.png"
 
 # 페이지 기본 설정
 st.set_page_config(
