@@ -3,6 +3,8 @@ from streamlit_option_menu import option_menu
 from app.components.profile_management import show_profile_management
 from app.components.job_management import show_job_management
 import os
+import requests
+import json
 
 # 이미지 URL 설정
 LOGO_URL = "https://i.imgur.com/thQZtYk.png"
@@ -14,9 +16,49 @@ st.set_page_config(
     layout="wide"
 )
 
-# OAuth 설정
+# 세션 상태 초기화
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
+if 'user_email' not in st.session_state:
+    st.session_state['user_email'] = None
+
+def exchange_code_for_token(code):
+    token_url = "https://oauth2.googleapis.com/token"
+    client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
+    client_secret = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_SECRET"]
+    
+    data = {
+        'code': code,
+        'client_id': client_id,
+        'client_secret': client_secret,
+        'redirect_uri': 'https://dreamirum.streamlit.app',
+        'grant_type': 'authorization_code'
+    }
+    
+    # 디버깅을 위한 정보 출력
+    st.write("Token Exchange Request Data:", json.dumps(data, indent=2))
+    
+    response = requests.post(token_url, data=data)
+    st.write("Token Exchange Response Status:", response.status_code)
+    st.write("Token Exchange Response Headers:", dict(response.headers))
+    
+    if not response.ok:
+        st.write("Token Exchange Error Response:", response.text)
+    if response.ok:
+        return response.json()
+    return None
+
+def get_user_info(access_token):
+    user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+    headers = {'Authorization': f'Bearer {access_token}'}
+    
+    response = requests.get(user_info_url, headers=headers)
+    st.write("User Info Response Status:", response.status_code)
+    if not response.ok:
+        st.write("User Info Error:", response.text)
+    if response.ok:
+        return response.json()
+    return None
 
 def main():
     # CSS 스타일 적용
@@ -67,6 +109,27 @@ def main():
         unsafe_allow_html=True
     )
 
+    # OAuth 콜백 처리
+    params = st.query_params
+    if 'code' in params and not st.session_state['authenticated']:
+        code = params['code']
+        st.write("Received authorization code:", code)
+        token_data = exchange_code_for_token(code)
+        
+        if token_data:
+            st.write("Token data received:", json.dumps(token_data, indent=2))
+            if 'access_token' in token_data:
+                user_info = get_user_info(token_data['access_token'])
+                if user_info and 'email' in user_info:
+                    st.session_state['authenticated'] = True
+                    st.session_state['user_email'] = user_info['email']
+                    params.clear()
+                    st.rerun()
+            else:
+                st.write("No access token in token data")
+        else:
+            st.write("Failed to exchange code for token")
+
     # 로그인 상태 확인
     if not st.session_state['authenticated']:
         st.markdown(
@@ -98,25 +161,30 @@ def main():
             """,
             unsafe_allow_html=True
         )
-
-        # Streamlit OAuth 로그인
-        name = st.experimental_user.email
-        if name:
-            st.session_state['authenticated'] = True
-            st.experimental_rerun()
-        else:
-            st.write("Please login using the link below:")
-            st.markdown(
-                """
-                <a href="/_streamlit/auth" target="_self">
-                    <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; display: flex; align-items: center;">
-                        <img src="https://www.google.com/favicon.ico" style="width: 18px; height: 18px; margin-right: 10px;">
-                        Sign in with Google
-                    </button>
-                </a>
-                """,
-                unsafe_allow_html=True
-            )
+        
+        # OAuth 로그인 버튼
+        client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
+        auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id={client_id}&redirect_uri=https://dreamirum.streamlit.app&scope=openid%20email%20profile&access_type=offline&prompt=consent"
+        
+        st.write("Debug - Auth URL generated")
+        st.write("Debug - Client ID:", client_id)
+        st.write("Debug - Full Auth URL:", auth_url)
+        
+        st.markdown(
+            f"""
+            <div class="main-container">
+                <div class="text-container">
+                    <a href="{auth_url}" target="_self">
+                        <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; display: flex; align-items: center;">
+                            <img src="https://www.google.com/favicon.ico" style="width: 18px; height: 18px; margin-right: 10px;">
+                            Sign in with Google
+                        </button>
+                    </a>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         return
 
     # 로그인 후 메인 화면
@@ -139,11 +207,12 @@ def main():
     # 메인 컨텐츠
     if selected == "대시보드":
         st.title("대시보드")
-        st.write(f"환영합니다, {st.experimental_user.email}님!")
+        st.write(f"환영합니다, {st.session_state['user_email']}님!")
         st.write("대시보드 기능은 준비 중입니다.")
         if st.button("로그아웃"):
             st.session_state['authenticated'] = False
-            st.experimental_rerun()
+            st.session_state['user_email'] = None
+            st.rerun()
     elif selected == "이력 관리":
         show_profile_management()
     elif selected == "공고 관리":
