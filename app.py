@@ -131,15 +131,22 @@ def main():
     params = st.query_params
     if 'code' in params and not st.session_state['authenticated']:
         code = params['code']
+        st.write("Received code from Google")
         token_data = exchange_code_for_token(code)
         
-        if token_data and 'access_token' in token_data:
-            user_info = get_user_info(token_data['access_token'])
-            if user_info and 'email' in user_info:
-                st.session_state['authenticated'] = True
-                st.session_state['user_email'] = user_info['email']
-                params.clear()
-                st.rerun()
+        if token_data:
+            st.write("Token data received:", token_data.keys())
+            if 'access_token' in token_data:
+                user_info = get_user_info(token_data['access_token'])
+                if user_info and 'email' in user_info:
+                    st.session_state['authenticated'] = True
+                    st.session_state['user_email'] = user_info['email']
+                    params.clear()
+                    st.rerun()
+            else:
+                st.write("No access token in token data")
+        else:
+            st.write("Failed to exchange code for token")
 
     # 로그인 상태 확인
     if not st.session_state['authenticated']:
