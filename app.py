@@ -82,9 +82,18 @@ def main():
             color: white;
         }
         /* 로그인 버튼 컨테이너 스타일 */
-        .block-container > div > div > div > div:nth-child(5) > div {
-            position: relative;
-            left: 2rem;
+        div.block-container > div > div > div > div:nth-child(5) {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        div.block-container > div > div > div > div:nth-child(5) > div {
+            max-width: 600px;
+            width: 100%;
+            padding: 0 2rem;
+        }
+        div.block-container > div > div > div > div:nth-child(5) > div > div {
+            text-align: left;
         }
         [data-testid="stFullScreenFrame"] [data-testid="stImage"] {
             display: flex;
