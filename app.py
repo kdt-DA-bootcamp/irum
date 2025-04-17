@@ -26,12 +26,13 @@ def exchange_code_for_token(code):
     token_url = "https://oauth2.googleapis.com/token"
     client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
     client_secret = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_SECRET"]
+    redirect_uri = 'https://dreamirum.streamlit.app/'
     
     data = {
         'code': code,
         'client_id': client_id,
         'client_secret': client_secret,
-        'redirect_uri': 'https://dreamirum.streamlit.app',
+        'redirect_uri': redirect_uri,
         'grant_type': 'authorization_code'
     }
     
@@ -164,10 +165,13 @@ def main():
         
         # OAuth 로그인 버튼
         client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
-        auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id={client_id}&redirect_uri=https://dreamirum.streamlit.app&scope=openid%20email%20profile&access_type=offline&prompt=consent"
+        redirect_uri = 'https://dreamirum.streamlit.app/'
+        state = st.session_state._session_id  # 보안을 위한 state 파라미터 추가
+        auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}&scope=openid%20email%20profile&access_type=offline&prompt=consent&state={state}"
         
         st.write("Debug - Auth URL generated")
         st.write("Debug - Client ID:", client_id)
+        st.write("Debug - Redirect URI:", redirect_uri)
         st.write("Debug - Full Auth URL:", auth_url)
         
         st.markdown(
