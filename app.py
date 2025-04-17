@@ -160,17 +160,27 @@ def main():
         
         # OAuth 로그인 버튼
         client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
-        redirect_uri = quote_plus('https://dreamirum.streamlit.app')
-        auth_url = (
-            "https://accounts.google.com/o/oauth2/v2/auth?"
-            f"client_id={client_id}&"
-            f"redirect_uri={redirect_uri}&"
-            "response_type=code&"
-            "scope=openid%20email%20profile&"
-            "access_type=online&"
-            "include_granted_scopes=true&"
-            "prompt=select_account"
-        )
+        redirect_uri = 'https://dreamirum.streamlit.app'
+        auth_base_url = "https://accounts.google.com/o/oauth2/v2/auth"
+        params = {
+            'client_id': client_id,
+            'redirect_uri': redirect_uri,
+            'response_type': 'code',
+            'scope': 'openid email profile',
+            'access_type': 'online',
+            'include_granted_scopes': 'true',
+            'prompt': 'select_account'
+        }
+        
+        # URL 파라미터 생성
+        param_list = []
+        for key, value in params.items():
+            if key == 'redirect_uri':
+                param_list.append(f"{key}={quote_plus(value)}")
+            else:
+                param_list.append(f"{key}={value}")
+        
+        auth_url = f"{auth_base_url}?{'&'.join(param_list)}"
         
         st.write("Generated Auth URL:", auth_url)
         
@@ -178,7 +188,7 @@ def main():
             f"""
             <div class="main-container">
                 <div class="text-container">
-                    <a href="{auth_url}" target="_self" onclick="console.log('Auth URL:', this.href);">
+                    <a href="{auth_url}" target="_self">
                         <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; display: flex; align-items: center;">
                             <img src="https://www.google.com/favicon.ico" style="width: 18px; height: 18px; margin-right: 10px;">
                             Sign in with Google
