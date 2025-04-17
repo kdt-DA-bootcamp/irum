@@ -37,9 +37,11 @@ def exchange_code_for_token(code):
         'grant_type': 'authorization_code'
     }
     
+    st.write("Token Exchange Request Data:", json.dumps(data, indent=2))
     response = requests.post(token_url, data=data)
+    st.write("Token Exchange Response Status:", response.status_code)
     if not response.ok:
-        st.error("로그인 처리 중 오류가 발생했습니다. 다시 시도해주세요.")
+        st.write("Token Exchange Error:", response.text)
     if response.ok:
         return response.json()
     return None
@@ -169,21 +171,20 @@ def main():
             'redirect_uri': redirect_uri,
             'response_type': 'code',
             'scope': 'openid email profile',
-            'access_type': 'online',
-            'prompt': 'select_account'
+            'access_type': 'offline',
+            'prompt': 'consent'
         }
         
         # URL 파라미터 생성
         param_list = []
         for key, value in params.items():
-            if key == 'redirect_uri':
-                param_list.append(f"{key}={quote_plus(value)}")
-            else:
-                param_list.append(f"{key}={value}")
+            param_list.append(f"{key}={quote_plus(value)}")
         
         auth_url = f"{auth_base_url}?{'&'.join(param_list)}"
         
         st.write("Generated Auth URL:", auth_url)
+        st.write("Client ID:", client_id)
+        st.write("Redirect URI:", redirect_uri)
         
         st.markdown(
             f"""
