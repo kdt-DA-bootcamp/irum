@@ -3,8 +3,7 @@ from streamlit_option_menu import option_menu
 from app.components.profile_management import show_profile_management
 from app.components.job_management import show_job_management
 import os
-from urllib.parse import quote_plus
-import requests
+from streamlit_google_oauth import oauth_login
 
 # 이미지 URL 설정
 LOGO_URL = "https://i.imgur.com/thQZtYk.png"
@@ -64,15 +63,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# 세션 상태 초기화
-if 'authenticated' not in st.session_state:
-    st.session_state['authenticated'] = False
-if 'user_email' not in st.session_state:
-    st.session_state['user_email'] = None
-
 def main():
     # 로그인 상태 확인
-    if not st.session_state['authenticated']:
+    if not oauth_login():
         st.markdown(
             """
             <style>
@@ -103,44 +96,6 @@ def main():
             """,
             unsafe_allow_html=True
         )
-
-        # OAuth 로그인 버튼
-        client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
-        redirect_uri = 'https://dreamirum.streamlit.app'
-        auth_base_url = "https://accounts.google.com/o/oauth2/v2/auth"
-        
-        # 최소한의 필수 파라미터만 사용
-        params = {
-            'client_id': client_id,
-            'redirect_uri': redirect_uri,
-            'response_type': 'code',
-            'scope': 'email'
-        }
-        
-        # URL 생성
-        param_list = [f"{key}={quote_plus(str(value))}" for key, value in params.items()]
-        auth_url = f"{auth_base_url}?{'&'.join(param_list)}"
-        
-        # OAuth 콜백 처리
-        params = st.query_params
-        if 'code' in params:
-            st.session_state['authenticated'] = True
-            st.session_state['user_email'] = 'user@example.com'
-            st.rerun()
-        
-        st.markdown(
-            f"""
-            <div style="display: flex; justify-content: flex-start; margin-left: 2rem;">
-                <a href="{auth_url}" target="_self">
-                    <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; display: flex; align-items: center;">
-                        <img src="https://www.google.com/favicon.ico" style="width: 18px; height: 18px; margin-right: 10px;">
-                        Sign in with Google
-                    </button>
-                </a>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
         return
 
     # 로그인 후 메인 화면
@@ -163,11 +118,11 @@ def main():
     # 메인 컨텐츠
     if selected == "대시보드":
         st.title("대시보드")
-        st.write(f"환영합니다, {st.session_state['user_email']}님!")
+        user_email = st.experimental_user.email
+        st.write(f"환영합니다, {user_email}님!")
         st.write("대시보드 기능은 준비 중입니다.")
         if st.button("로그아웃"):
-            st.session_state['authenticated'] = False
-            st.session_state['user_email'] = None
+            st.experimental_user.logout()
             st.rerun()
     elif selected == "이력 관리":
         show_profile_management()
