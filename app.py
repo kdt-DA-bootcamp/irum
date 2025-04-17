@@ -88,28 +88,38 @@ def exchange_code_for_token(code, redirect_uri):
         'redirect_uri': redirect_uri,
         'grant_type': 'authorization_code'
     }
+    st.write("Token exchange request data:", data)
     response = requests.post(token_url, data=data)
-    if response.ok:
-        return response.json()
-    st.error(f"Token exchange failed: {response.text}")
-    return None
+    st.write("Token exchange response status:", response.status_code)
+    if not response.ok:
+        st.error(f"Token exchange failed: {response.text}")
+        return None
+    return response.json()
 
 def main():
     # OAuth 콜백 처리
     params = st.query_params
+    st.write("Query parameters:", params)
+    
     if 'code' in params and not st.session_state['authenticated']:
         st.write("Received authorization code")
-        redirect_uri = 'https://dreamirum.streamlit.app/_stcore/oauth2/callback'
+        # 리디렉션 URI를 원래 앱 URL로 변경
+        redirect_uri = 'https://dreamirum.streamlit.app'
         token_data = exchange_code_for_token(params['code'], redirect_uri)
         
-        if token_data and 'access_token' in token_data:
-            user_info = get_user_info(token_data['access_token'])
-            if user_info and 'email' in user_info:
-                st.session_state['authenticated'] = True
-                st.session_state['user_email'] = user_info['email']
-                st.rerun()
+        if token_data:
+            st.write("Token data received:", token_data)
+            if 'access_token' in token_data:
+                user_info = get_user_info(token_data['access_token'])
+                st.write("User info received:", user_info)
+                if user_info and 'email' in user_info:
+                    st.session_state['authenticated'] = True
+                    st.session_state['user_email'] = user_info['email']
+                    st.rerun()
+                else:
+                    st.error("Failed to get user info")
             else:
-                st.error("Failed to get user info")
+                st.error("No access token in response")
         else:
             st.error("Failed to exchange code for token")
 
@@ -125,10 +135,31 @@ def main():
             """,
             unsafe_allow_html=True
         )
-        # 로고
+        
+        # OAuth 로그인 버튼
+        client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
+        redirect_uri = 'https://dreamirum.streamlit.app'  # 리디렉션 URI 수정
+        auth_base_url = "https://accounts.google.com/o/oauth2/v2/auth"
+        
+        # URL 파라미터 설정
+        params = {
+            'client_id': client_id,
+            'redirect_uri': redirect_uri,
+            'response_type': 'code',
+            'scope': 'openid email profile',
+            'access_type': 'online',
+            'prompt': 'consent'  # consent로 변경하여 항상 동의 화면 표시
+        }
+        
+        # URL 파라미터 생성
+        param_list = [f"{key}={quote_plus(str(value))}" for key, value in params.items()]
+        auth_url = f"{auth_base_url}?{'&'.join(param_list)}"
+        
+        st.write("Auth URL:", auth_url)  # 인증 URL 출력
+        
+        # 로고와 텍스트는 그대로 유지
         st.image(LOGO_URL, width=300)
         
-        # 텍스트
         st.markdown(
             """
             <div class="main-container">
@@ -145,25 +176,6 @@ def main():
             unsafe_allow_html=True
         )
 
-        # OAuth 로그인 버튼
-        client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
-        redirect_uri = 'https://dreamirum.streamlit.app/_stcore/oauth2/callback'
-        auth_base_url = "https://accounts.google.com/o/oauth2/v2/auth"
-        
-        # URL 파라미터 설정
-        params = {
-            'client_id': client_id,
-            'redirect_uri': redirect_uri,
-            'response_type': 'code',
-            'scope': 'openid email profile',
-            'access_type': 'online',
-            'state': 'streamlit_auth'
-        }
-        
-        # URL 파라미터 생성
-        param_list = [f"{key}={quote_plus(str(value))}" for key, value in params.items()]
-        auth_url = f"{auth_base_url}?{'&'.join(param_list)}"
-        
         st.markdown(
             f"""
             <div style="display: flex; justify-content: flex-start; margin-left: 2rem;">
