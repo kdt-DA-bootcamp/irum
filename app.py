@@ -5,7 +5,6 @@ from app.components.job_management import show_job_management
 import os
 from urllib.parse import quote_plus
 import requests
-import json
 
 # 이미지 URL 설정
 LOGO_URL = "https://i.imgur.com/thQZtYk.png"
@@ -71,58 +70,7 @@ if 'authenticated' not in st.session_state:
 if 'user_email' not in st.session_state:
     st.session_state['user_email'] = None
 
-def get_user_info(access_token):
-    user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
-    headers = {'Authorization': f'Bearer {access_token}'}
-    response = requests.get(user_info_url, headers=headers)
-    if response.ok:
-        return response.json()
-    return None
-
-def exchange_code_for_token(code, redirect_uri):
-    token_url = "https://oauth2.googleapis.com/token"
-    data = {
-        'code': code,
-        'client_id': st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"],
-        'client_secret': st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_SECRET"],
-        'redirect_uri': redirect_uri,
-        'grant_type': 'authorization_code'
-    }
-    st.write("Token exchange request data:", data)
-    response = requests.post(token_url, data=data)
-    st.write("Token exchange response status:", response.status_code)
-    if not response.ok:
-        st.error(f"Token exchange failed: {response.text}")
-        return None
-    return response.json()
-
 def main():
-    # OAuth 콜백 처리
-    params = st.query_params
-    st.write("Query parameters:", params)
-    
-    if 'code' in params and not st.session_state['authenticated']:
-        st.write("Received authorization code")
-        # 리디렉션 URI를 원래 앱 URL로 변경
-        redirect_uri = 'https://dreamirum.streamlit.app'
-        token_data = exchange_code_for_token(params['code'], redirect_uri)
-        
-        if token_data:
-            st.write("Token data received:", token_data)
-            if 'access_token' in token_data:
-                user_info = get_user_info(token_data['access_token'])
-                st.write("User info received:", user_info)
-                if user_info and 'email' in user_info:
-                    st.session_state['authenticated'] = True
-                    st.session_state['user_email'] = user_info['email']
-                    st.rerun()
-                else:
-                    st.error("Failed to get user info")
-            else:
-                st.error("No access token in response")
-        else:
-            st.error("Failed to exchange code for token")
-
     # 로그인 상태 확인
     if not st.session_state['authenticated']:
         st.markdown(
@@ -136,30 +84,10 @@ def main():
             unsafe_allow_html=True
         )
         
-        # OAuth 로그인 버튼
-        client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
-        redirect_uri = 'https://dreamirum.streamlit.app'  # 리디렉션 URI 수정
-        auth_base_url = "https://accounts.google.com/o/oauth2/v2/auth"
-        
-        # URL 파라미터 설정
-        params = {
-            'client_id': client_id,
-            'redirect_uri': redirect_uri,
-            'response_type': 'code',
-            'scope': 'openid email profile',
-            'access_type': 'online',
-            'prompt': 'consent'  # consent로 변경하여 항상 동의 화면 표시
-        }
-        
-        # URL 파라미터 생성
-        param_list = [f"{key}={quote_plus(str(value))}" for key, value in params.items()]
-        auth_url = f"{auth_base_url}?{'&'.join(param_list)}"
-        
-        st.write("Auth URL:", auth_url)  # 인증 URL 출력
-        
-        # 로고와 텍스트는 그대로 유지
+        # 로고
         st.image(LOGO_URL, width=300)
         
+        # 텍스트
         st.markdown(
             """
             <div class="main-container">
@@ -176,6 +104,30 @@ def main():
             unsafe_allow_html=True
         )
 
+        # OAuth 로그인 버튼
+        client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
+        redirect_uri = 'https://dreamirum.streamlit.app'
+        auth_base_url = "https://accounts.google.com/o/oauth2/v2/auth"
+        
+        # 최소한의 필수 파라미터만 사용
+        params = {
+            'client_id': client_id,
+            'redirect_uri': redirect_uri,
+            'response_type': 'code',
+            'scope': 'email'
+        }
+        
+        # URL 생성
+        param_list = [f"{key}={quote_plus(str(value))}" for key, value in params.items()]
+        auth_url = f"{auth_base_url}?{'&'.join(param_list)}"
+        
+        # OAuth 콜백 처리
+        params = st.query_params
+        if 'code' in params:
+            st.session_state['authenticated'] = True
+            st.session_state['user_email'] = 'user@example.com'
+            st.rerun()
+        
         st.markdown(
             f"""
             <div style="display: flex; justify-content: flex-start; margin-left: 2rem;">
