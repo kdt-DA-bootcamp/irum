@@ -132,7 +132,6 @@ def main():
             if user_info and 'email' in user_info:
                 st.session_state['authenticated'] = True
                 st.session_state['user_email'] = user_info['email']
-                # 인증 코드 제거
                 params.clear()
                 st.rerun()
 
@@ -210,6 +209,10 @@ def main():
         st.title("대시보드")
         st.write(f"환영합니다, {st.session_state['user_email']}님!")
         st.write("대시보드 기능은 준비 중입니다.")
+        if st.button("로그아웃"):
+            st.session_state['authenticated'] = False
+            st.session_state['user_email'] = None
+            st.rerun()
     elif selected == "이력 관리":
         show_profile_management()
     elif selected == "공고 관리":
