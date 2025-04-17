@@ -26,7 +26,7 @@ def exchange_code_for_token(code):
     token_url = "https://oauth2.googleapis.com/token"
     client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
     client_secret = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_SECRET"]
-    redirect_uri = 'https://dreamirum.streamlit.app/'
+    redirect_uri = 'https://dreamirum.streamlit.app'
     
     data = {
         'code': code,
@@ -36,15 +36,9 @@ def exchange_code_for_token(code):
         'grant_type': 'authorization_code'
     }
     
-    # 디버깅을 위한 정보 출력
-    st.write("Token Exchange Request Data:", json.dumps(data, indent=2))
-    
     response = requests.post(token_url, data=data)
-    st.write("Token Exchange Response Status:", response.status_code)
-    st.write("Token Exchange Response Headers:", dict(response.headers))
-    
     if not response.ok:
-        st.write("Token Exchange Error Response:", response.text)
+        st.error("로그인 처리 중 오류가 발생했습니다. 다시 시도해주세요.")
     if response.ok:
         return response.json()
     return None
@@ -165,20 +159,16 @@ def main():
         
         # OAuth 로그인 버튼
         client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
-        redirect_uri = 'https://dreamirum.streamlit.app/'
-        state = st.session_state._session_id  # 보안을 위한 state 파라미터 추가
-        auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}&scope=openid%20email%20profile&access_type=offline&prompt=consent&state={state}"
+        redirect_uri = 'https://dreamirum.streamlit.app'
+        auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}&scope=openid%20email%20profile"
         
-        st.write("Debug - Auth URL generated")
-        st.write("Debug - Client ID:", client_id)
-        st.write("Debug - Redirect URI:", redirect_uri)
-        st.write("Debug - Full Auth URL:", auth_url)
+        st.write("Generated Auth URL:", auth_url)  # URL 확인용 로그
         
         st.markdown(
             f"""
             <div class="main-container">
                 <div class="text-container">
-                    <a href="{auth_url}" target="_self">
+                    <a href="{auth_url}" target="_self" onclick="console.log('Auth URL:', this.href);">
                         <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; display: flex; align-items: center;">
                             <img src="https://www.google.com/favicon.ico" style="width: 18px; height: 18px; margin-right: 10px;">
                             Sign in with Google
