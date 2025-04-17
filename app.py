@@ -5,6 +5,7 @@ from app.components.job_management import show_job_management
 import os
 import requests
 import json
+from urllib.parse import quote_plus
 
 # 이미지 URL 설정
 LOGO_URL = "https://i.imgur.com/thQZtYk.png"
@@ -159,10 +160,19 @@ def main():
         
         # OAuth 로그인 버튼
         client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
-        redirect_uri = 'https://dreamirum.streamlit.app'
-        auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id={client_id}&redirect_uri={redirect_uri}&scope=openid%20email%20profile"
+        redirect_uri = quote_plus('https://dreamirum.streamlit.app')
+        auth_url = (
+            "https://accounts.google.com/o/oauth2/v2/auth?"
+            f"client_id={client_id}&"
+            f"redirect_uri={redirect_uri}&"
+            "response_type=code&"
+            "scope=openid%20email%20profile&"
+            "access_type=online&"
+            "include_granted_scopes=true&"
+            "prompt=select_account"
+        )
         
-        st.write("Generated Auth URL:", auth_url)  # URL 확인용 로그
+        st.write("Generated Auth URL:", auth_url)
         
         st.markdown(
             f"""
