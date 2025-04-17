@@ -35,6 +35,9 @@ def exchange_code_for_token(code):
     }
     
     response = requests.post(token_url, data=data)
+    st.write("Token Exchange Response Status:", response.status_code)
+    if not response.ok:
+        st.write("Token Exchange Error:", response.text)
     if response.ok:
         return response.json()
     return None
@@ -44,6 +47,9 @@ def get_user_info(access_token):
     headers = {'Authorization': f'Bearer {access_token}'}
     
     response = requests.get(user_info_url, headers=headers)
+    st.write("User Info Response Status:", response.status_code)
+    if not response.ok:
+        st.write("User Info Error:", response.text)
     if response.ok:
         return response.json()
     return None
