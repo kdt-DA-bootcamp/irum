@@ -162,13 +162,14 @@ def main():
         client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
         redirect_uri = 'https://dreamirum.streamlit.app'
         auth_base_url = "https://accounts.google.com/o/oauth2/v2/auth"
+        
+        # URL 파라미터 설정 (scope는 공백으로 구분)
         params = {
             'client_id': client_id,
             'redirect_uri': redirect_uri,
             'response_type': 'code',
             'scope': 'openid email profile',
             'access_type': 'online',
-            'include_granted_scopes': 'true',
             'prompt': 'select_account'
         }
         
