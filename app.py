@@ -4,6 +4,8 @@ from app.components.profile_management import show_profile_management
 from app.components.job_management import show_job_management
 import os
 from urllib.parse import quote_plus
+import requests
+import json
 
 # 이미지 URL 설정
 LOGO_URL = "https://i.imgur.com/thQZtYk.png"
@@ -69,7 +71,48 @@ if 'authenticated' not in st.session_state:
 if 'user_email' not in st.session_state:
     st.session_state['user_email'] = None
 
+def get_user_info(access_token):
+    user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+    headers = {'Authorization': f'Bearer {access_token}'}
+    response = requests.get(user_info_url, headers=headers)
+    if response.ok:
+        return response.json()
+    return None
+
+def exchange_code_for_token(code, redirect_uri):
+    token_url = "https://oauth2.googleapis.com/token"
+    data = {
+        'code': code,
+        'client_id': st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"],
+        'client_secret': st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_SECRET"],
+        'redirect_uri': redirect_uri,
+        'grant_type': 'authorization_code'
+    }
+    response = requests.post(token_url, data=data)
+    if response.ok:
+        return response.json()
+    st.error(f"Token exchange failed: {response.text}")
+    return None
+
 def main():
+    # OAuth 콜백 처리
+    params = st.query_params
+    if 'code' in params and not st.session_state['authenticated']:
+        st.write("Received authorization code")
+        redirect_uri = 'https://dreamirum.streamlit.app/_stcore/oauth2/callback'
+        token_data = exchange_code_for_token(params['code'], redirect_uri)
+        
+        if token_data and 'access_token' in token_data:
+            user_info = get_user_info(token_data['access_token'])
+            if user_info and 'email' in user_info:
+                st.session_state['authenticated'] = True
+                st.session_state['user_email'] = user_info['email']
+                st.rerun()
+            else:
+                st.error("Failed to get user info")
+        else:
+            st.error("Failed to exchange code for token")
+
     # 로그인 상태 확인
     if not st.session_state['authenticated']:
         st.markdown(
@@ -114,7 +157,6 @@ def main():
             'response_type': 'code',
             'scope': 'openid email profile',
             'access_type': 'online',
-            'include_granted_scopes': 'true',
             'state': 'streamlit_auth'
         }
         
@@ -135,13 +177,6 @@ def main():
             """,
             unsafe_allow_html=True
         )
-        
-        # OAuth 콜백 처리
-        params = st.query_params
-        if 'code' in params:
-            st.session_state['authenticated'] = True
-            st.session_state['user_email'] = "user@example.com"  # 실제 이메일은 OAuth 응답에서 가져와야 함
-            st.rerun()
         return
 
     # 로그인 후 메인 화면
