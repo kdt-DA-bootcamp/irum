@@ -183,6 +183,11 @@ def main():
         # OAuth 로그인 버튼
         client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
         auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id={client_id}&redirect_uri=https://dreamirum.streamlit.app&scope=openid%20email%20profile"
+        
+        st.write("Debug - Auth URL generated")
+        st.write("Debug - Client ID:", client_id)
+        st.write("Debug - Full Auth URL:", auth_url)
+
         st.markdown(
             f"""
             <div class="main-container">
