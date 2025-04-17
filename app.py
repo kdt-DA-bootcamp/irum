@@ -15,8 +15,8 @@ st.set_page_config(
 )
 
 # OAuth 설정
-client_id = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_ID"]
-client_secret = st.secrets["google_oauth"]["GOOGLE_OAUTH_CLIENT_SECRET"]
+if 'authenticated' not in st.session_state:
+    st.session_state['authenticated'] = False
 
 def main():
     # CSS 스타일 적용
@@ -68,7 +68,7 @@ def main():
     )
 
     # 로그인 상태 확인
-    if not st.experimental_user.email:
+    if not st.session_state['authenticated']:
         st.markdown(
             """
             <style>
@@ -98,22 +98,25 @@ def main():
             """,
             unsafe_allow_html=True
         )
-        
-        st.markdown(
-            """
-            <div class="main-container">
-                <div class="text-container">
-                    <a href="https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?response_type=code&client_id={}&redirect_uri=https://dreamirum.streamlit.app/_stcore/oauth2/callback&scope=openid%20email%20profile&service=lso&o2v=2&theme=glif&flowName=GeneralOAuthFlow" target="_self">
-                        <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; display: flex; align-items: center;">
-                            <img src="https://www.google.com/favicon.ico" style="width: 18px; height: 18px; margin-right: 10px;">
-                            Sign in with Google
-                        </button>
-                    </a>
-                </div>
-            </div>
-            """.format(client_id),
-            unsafe_allow_html=True
-        )
+
+        # Streamlit OAuth 로그인
+        name = st.experimental_user.email
+        if name:
+            st.session_state['authenticated'] = True
+            st.experimental_rerun()
+        else:
+            st.write("Please login using the link below:")
+            st.markdown(
+                """
+                <a href="/_streamlit/auth" target="_self">
+                    <button style="background-color: white; color: #444; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; display: flex; align-items: center;">
+                        <img src="https://www.google.com/favicon.ico" style="width: 18px; height: 18px; margin-right: 10px;">
+                        Sign in with Google
+                    </button>
+                </a>
+                """,
+                unsafe_allow_html=True
+            )
         return
 
     # 로그인 후 메인 화면
@@ -139,6 +142,7 @@ def main():
         st.write(f"환영합니다, {st.experimental_user.email}님!")
         st.write("대시보드 기능은 준비 중입니다.")
         if st.button("로그아웃"):
+            st.session_state['authenticated'] = False
             st.experimental_rerun()
     elif selected == "이력 관리":
         show_profile_management()
