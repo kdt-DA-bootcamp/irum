@@ -1,0 +1,5 @@
+[browser]
+gatherUsageStats = false
+
+[oauth]
+client_id = "109434929141-lqffjr31vbsmc27ejm9dd539o3brk31i.apps.googleusercontent.com" 
